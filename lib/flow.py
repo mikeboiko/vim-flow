@@ -71,7 +71,7 @@ def get_cmd_def(filepath, flow_defs):
 
     return {
         'runner': 'string | vim|tmux',
-        'tmux_sesion': 'string |  tmux_session',
+        'tmux_session': 'string |  tmux_session',
         'tmux_pane': 'int | tmux_pane',
         'cmd': 'string, command to be executed',
     }

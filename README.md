@@ -118,10 +118,20 @@ go:
   tmux_pane: 1
   cmd: | #!/bin/bash
     echo "executing go script in another tmux pane"
-    go run {{filepath}}
+    go run "{{filepath}}"
 ```
 
 ![tmux example](https://cdn.pbrd.co/images/VFLAzcF.gif)
+
+Specify tmux_windows by appending `:[window]` to `tmux_session`
+
+```yaml
+# .flow.yaml
+go:
+  tmux_session: foo:2
+  tmux_pane: 1
+  cmd: go run "{{filepath}}"
+```
 
 ## Installation
 
