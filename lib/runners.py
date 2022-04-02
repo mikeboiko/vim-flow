@@ -58,7 +58,7 @@ def vim_runner(cmd_def):
     '''
     cleanup()
     with _script(cmd_def) as script_path:
-        vim.command('! {}'.format(script_path))
+        vim.command('terminal ++rows=15 {}'.format(script_path))
 
 
 def tmux_runner(cmd_def):
