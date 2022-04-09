@@ -1,6 +1,6 @@
 import os.path
 import yaml
-
+import subprocess
 
 def get_defs(filepath):
     '''get_flow_defs: returns the best matched flowfile and returns the flow_defs
@@ -24,14 +24,15 @@ def get_defs(filepath):
         with open(flow_filepath, 'r') as fh:
             flow_defs = yaml.safe_load(fh)
     except IOError:
-        print('`flow.yml` file at %s appears to be non-readable from within vim' % flow_filepath)
+        print(
+            '`flow.yml` file at %s appears to be non-readable from within vim' %
+            flow_filepath)
     except yaml.YAMLError:
         print('`flow.yml` file at %s is not parseable yaml' % flow_filepath)
     else:
         return flow_defs
 
     return None
-
 
 def _format_cmd_def(cmd_def, filepath):
     '''_format_cmd_def: format a command def
@@ -65,7 +66,6 @@ def _format_cmd_def(cmd_def, filepath):
 
     return cmd_def
 
-
 def get_cmd_def(filepath, flow_defs):
     '''find_cmd: returns a cmd_def based upon the flow_defs and filepath
 
@@ -80,7 +80,16 @@ def get_cmd_def(filepath, flow_defs):
     filename, ext = os.path.splitext(basename)
 
     cmd_def = flow_defs.get('default')
-    if basename in flow_defs:
+
+    # Check for git projects
+    cmd = 'git rev-parse --show-toplevel'
+    out = subprocess.run(cmd.split(' '), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    repo_full = out.stdout.decode('utf-8')
+    repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
+
+    if repo_name in flow_defs:
+        cmd_def = flow_defs[repo_name]
+    elif basename in flow_defs:
         cmd_def = flow_defs[basename]
     elif filename in flow_defs:
         cmd_def = flow_defs[filename]
@@ -89,8 +98,12 @@ def get_cmd_def(filepath, flow_defs):
     elif ext.replace('.', '') in flow_defs:
         cmd_def = flow_defs[ext.replace('.', '')]
 
+    # vim.command("echom '" + str(cmd_def).replace("'", '').replace('"', '') + "'")
+
     if cmd_def is None:
-        print('no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...')
+        print(
+            'no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...'
+        )
         return None
 
     return _format_cmd_def(cmd_def, filepath)
