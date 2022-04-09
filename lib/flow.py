@@ -2,7 +2,6 @@ import os.path
 import yaml
 import subprocess
 
-
 def get_defs(filepath):
     '''get_flow_defs: returns the best matched flowfile and returns the flow_defs
 
@@ -25,14 +24,15 @@ def get_defs(filepath):
         with open(flow_filepath, 'r') as fh:
             flow_defs = yaml.safe_load(fh)
     except IOError:
-        print('`flow.yml` file at %s appears to be non-readable from within vim' % flow_filepath)
+        print(
+            '`flow.yml` file at %s appears to be non-readable from within vim' %
+            flow_filepath)
     except yaml.YAMLError:
         print('`flow.yml` file at %s is not parseable yaml' % flow_filepath)
     else:
         return flow_defs
 
     return None
-
 
 def _format_cmd_def(cmd_def, filepath):
     '''_format_cmd_def: format a command def
@@ -65,7 +65,6 @@ def _format_cmd_def(cmd_def, filepath):
         cmd_def['cmd'] = '#!/usr/bin/env bash\n' + cmd_def['cmd']
 
     return cmd_def
-
 
 def get_cmd_def(filepath, flow_defs):
     '''find_cmd: returns a cmd_def based upon the flow_defs and filepath
@@ -102,7 +101,9 @@ def get_cmd_def(filepath, flow_defs):
     # vim.command("echom '" + str(cmd_def).replace("'", '').replace('"', '') + "'")
 
     if cmd_def is None:
-        print('no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...')
+        print(
+            'no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...'
+        )
         return None
 
     return _format_cmd_def(cmd_def, filepath)
