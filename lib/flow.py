@@ -1,5 +1,6 @@
 import os.path
 import yaml
+import subprocess
 
 
 def get_defs(filepath):
@@ -80,7 +81,16 @@ def get_cmd_def(filepath, flow_defs):
     filename, ext = os.path.splitext(basename)
 
     cmd_def = flow_defs.get('default')
-    if basename in flow_defs:
+
+    # Check for git projects
+    cmd = 'git rev-parse --show-toplevel'
+    out = subprocess.run(cmd.split(' '), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    repo_full = out.stdout.decode('utf-8')
+    repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
+
+    if repo_name in flow_defs:
+        cmd_def = flow_defs[repo_name]
+    elif basename in flow_defs:
         cmd_def = flow_defs[basename]
     elif filename in flow_defs:
         cmd_def = flow_defs[filename]
@@ -88,6 +98,8 @@ def get_cmd_def(filepath, flow_defs):
         cmd_def = flow_defs[ext]
     elif ext.replace('.', '') in flow_defs:
         cmd_def = flow_defs[ext.replace('.', '')]
+
+    # vim.command("echom '" + str(cmd_def).replace("'", '').replace('"', '') + "'")
 
     if cmd_def is None:
         print('no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...')
