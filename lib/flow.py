@@ -87,10 +87,10 @@ def get_cmd_def(filepath, flow_defs):
     repo_full = out.stdout.decode('utf-8')
     repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
 
-    if repo_name in flow_defs:
-        cmd_def = flow_defs[repo_name]
-    elif basename in flow_defs:
+    if basename in flow_defs:
         cmd_def = flow_defs[basename]
+    elif repo_name in flow_defs:
+        cmd_def = flow_defs[repo_name]
     elif filename in flow_defs:
         cmd_def = flow_defs[filename]
     elif ext in flow_defs:
