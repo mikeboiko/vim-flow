@@ -53,7 +53,8 @@ def vim_runner(cmd_def):
     '''
     cleanup()
     with _script(cmd_def) as script_path:
-        vim.command('terminal ++rows=15 {}'.format(script_path))
+        term_close = vim.eval('g:term_close')
+        vim.command(f'terminal {term_close} ++rows=15 {script_path}')
 
 def tmux_runner(cmd_def):
     '''tmux_runner: accept a command definition and then run it as a shell script in the tmux session.pane.
