@@ -54,7 +54,10 @@ def vim_runner(cmd_def):
     cleanup()
     with _script(cmd_def) as script_path:
         term_close = vim.eval('g:term_close')
-        vim.command(f'terminal {term_close} ++rows=15 {script_path}')
+        if 'nvim' in vim.eval('$VIMRUNTIME'):
+            vim.command(f'15split term://{script_path}')
+        else:
+            vim.command(f'terminal {term_close} ++rows=15 {script_path}')
 
 def tmux_runner(cmd_def):
     '''tmux_runner: accept a command definition and then run it as a shell script in the tmux session.pane.
