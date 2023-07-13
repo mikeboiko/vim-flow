@@ -2,6 +2,8 @@ import os.path
 import yaml
 import subprocess
 
+from pathlib import Path
+
 def get_defs(filepath):
     '''get_flow_defs: returns the best matched flowfile and returns the flow_defs
 
@@ -78,12 +80,13 @@ def get_cmd_def(filepath, flow_defs):
     '''
     basename = os.path.basename(filepath)
     filename, ext = os.path.splitext(basename)
+    filedir = Path(filepath).parents[0]
 
     cmd_def = flow_defs.get('default')
 
     # Check for git projects
-    cmd = 'git rev-parse --show-toplevel'
-    out = subprocess.run(cmd.split(' '), stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    cmd = f'cd {filedir}; git rev-parse --show-toplevel'
+    out = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
     repo_full = out.stdout.decode('utf-8')
     repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
 
