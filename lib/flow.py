@@ -81,6 +81,7 @@ def get_cmd_def(filepath, flow_defs):
     basename = os.path.basename(filepath)
     filename, ext = os.path.splitext(basename)
     filedir = Path(filepath).parents[0]
+    folder = filedir.name # The folder where the current file resides
 
     cmd_def = flow_defs.get('default')
 
@@ -92,6 +93,8 @@ def get_cmd_def(filepath, flow_defs):
 
     if basename in flow_defs:
         cmd_def = flow_defs[basename]
+    elif folder in flow_defs:
+        cmd_def = flow_defs[folder]
     elif repo_name in flow_defs:
         cmd_def = flow_defs[repo_name]
     elif filename in flow_defs:
@@ -100,8 +103,6 @@ def get_cmd_def(filepath, flow_defs):
         cmd_def = flow_defs[ext]
     elif ext.replace('.', '') in flow_defs:
         cmd_def = flow_defs[ext.replace('.', '')]
-
-    # vim.command("echom '" + str(cmd_def).replace("'", '').replace('"', '') + "'")
 
     if cmd_def is None:
         print(
