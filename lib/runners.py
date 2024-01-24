@@ -15,7 +15,7 @@ def _build_script(cmd_def):
     written to a tempfile and executed
     '''
     filepath = '/tmp/flow--{}'.format(int(time.time()))
-    print(filepath)
+    # print(filepath)
 
     # if the script doesn't start with a hashbang, then we default to the local $SHELL var
     with open(filepath, 'w') as fh:
