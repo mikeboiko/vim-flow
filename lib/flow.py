@@ -1,16 +1,17 @@
 import os.path
-import yaml
 import subprocess
-
 from pathlib import Path
 
+import yaml
+
+
 def get_defs(filepath):
-    '''get_flow_defs: returns the best matched flowfile and returns the flow_defs
+    """get_flow_defs: returns the best matched flowfile and returns the flow_defs
 
     This method walks directories from the current filepath all the way to `/`
     and will return the first `.flow.yml` file it finds.
 
-    '''
+    """
     dirpath = os.path.dirname(filepath)
     flow_filepath = None
     while dirpath != '/':
@@ -26,9 +27,7 @@ def get_defs(filepath):
         with open(flow_filepath, 'r') as fh:
             flow_defs = yaml.safe_load(fh)
     except IOError:
-        print(
-            '`flow.yml` file at %s appears to be non-readable from within vim' %
-            flow_filepath)
+        print('`flow.yml` file at %s appears to be non-readable from within vim' % flow_filepath)
     except yaml.YAMLError:
         print('`flow.yml` file at %s is not parseable yaml' % flow_filepath)
     else:
@@ -36,12 +35,13 @@ def get_defs(filepath):
 
     return None
 
+
 def _format_cmd_def(cmd_def, filepath):
-    '''_format_cmd_def: format a command def
+    """_format_cmd_def: format a command def
 
     * template `filepath` into the cmd string
     * add the runner field
-    '''
+    """
     _dir = os.path.dirname(filepath)
     templates = {
         '{{filepath}}': filepath,
@@ -57,9 +57,10 @@ def _format_cmd_def(cmd_def, filepath):
             cmd_def['runner'] = 'tmux'
         else:
             cmd_def['runner'] = 'vim'
+            # cmd_def['runner'] = 'debug'
 
     cmd_def['runner'] = cmd_def['runner'].replace('_', '-')
-    if cmd_def['runner'] not in ('vim', 'tmux', 'async-remote', 'sync-remote'):
+    if cmd_def['runner'] not in ('debug', 'vim', 'tmux', 'async-remote', 'sync-remote'):
         print('invalid runner, must be one of vim,tmux,async-remote,sync-remote')
         return
 
@@ -68,8 +69,9 @@ def _format_cmd_def(cmd_def, filepath):
 
     return cmd_def
 
+
 def get_cmd_def(filepath, flow_defs):
-    '''find_cmd: returns a cmd_def based upon the flow_defs and filepath
+    """find_cmd: returns a cmd_def based upon the flow_defs and filepath
 
     return {
         'runner': 'string | vim|tmux',
@@ -77,11 +79,11 @@ def get_cmd_def(filepath, flow_defs):
         'tmux_pane': 'int | tmux_pane',
         'cmd': 'string, command to be executed',
     }
-    '''
+    """
     basename = os.path.basename(filepath)
     filename, ext = os.path.splitext(basename)
     filedir = Path(filepath).parents[0]
-    folder = filedir.name # The folder where the current file resides
+    folder = filedir.name  # The folder where the current file resides
 
     cmd_def = flow_defs.get('default')
 
@@ -105,9 +107,7 @@ def get_cmd_def(filepath, flow_defs):
         cmd_def = flow_defs[ext.replace('.', '')]
 
     if cmd_def is None:
-        print(
-            'no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...'
-        )
+        print('no valid command definitions found in `.flow.yml`. Try adding an extension or `all` def...')
         return None
 
     return _format_cmd_def(cmd_def, filepath)

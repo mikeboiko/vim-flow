@@ -1,18 +1,20 @@
-import vim
 import os
+
+import vim
 
 import flow
 import runners
 
 lock_cache = {}
 
+
 def run_flow(cache=lock_cache):
-    '''flow: run a flow for the current filepath
+    """flow: run a flow for the current filepath
 
     * find and load flow defs
     * build cmd_def
     * run cmd_def
-    '''
+    """
     if 'filepath' in lock_cache:
         filepath = lock_cache['filepath']
 
@@ -30,6 +32,7 @@ def run_flow(cache=lock_cache):
         return
 
     runner = {
+        'debug': runners.debug_runner,
         'vim': runners.vim_runner,
         'tmux': runners.tmux_runner,
         'sync-remote': runners.sync_remote_runner,
@@ -46,10 +49,10 @@ def toggle_lock(filepath, cache=lock_cache):
 
     if 'filepath' in cache:
         del cache['filepath']
-        print("file lock released...")
+        print('file lock released...')
     else:
         cache['filepath'] = _get_filepath()
-        print("file lock set...")
+        print('file lock set...')
 
 
 def _get_filepath():
