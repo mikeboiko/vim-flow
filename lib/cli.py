@@ -42,6 +42,26 @@ def run_flow(cache=lock_cache):
     runner(cmd_def)
 
 
+def debug_flow(lock_cache):
+    if 'filepath' in lock_cache:
+        filepath = lock_cache['filepath']
+
+        dirpath = os.path.dirname(filepath)
+        dirpath = os.path.expanduser(dirpath)
+        os.chdir(dirpath)
+    else:
+        filepath = _get_filepath()
+    flow_defs = flow.get_defs(filepath)
+    if flow_defs is None:
+        return
+
+    cmd_def = flow.get_cmd_def(filepath, flow_defs)
+    if cmd_def is None:
+        return
+
+    runners.debug_runner(cmd_def)
+
+
 def toggle_lock(filepath, cache=lock_cache):
     if filepath:
         cache['filepath'] = filepath

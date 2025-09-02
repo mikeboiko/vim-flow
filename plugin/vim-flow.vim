@@ -26,6 +26,9 @@ EOF
 " run flow for the current window
 command! FlowRun :python3 cli.run_flow("")
 
+" run flow for the current window
+command! FlowDebug :python3 cli.debug_flow("")
+
 " toggle lock on / off for current file
 command! FlowToggleLock :python3 cli.toggle_lock("")
 

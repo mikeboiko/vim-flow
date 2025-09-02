@@ -180,6 +180,7 @@ go:
 VimFlow provides two commands out of the box:
 
 - `:FlowRun` - run a flow for the current file.
+- `:FlowDebug` - run a flow with the debug runner.
 - `:FlowToggleLock` - lock or unlock the current file
 
 By design, `vim-flow` doesn't have any opinions about how these commands should be run as part of your vim workflow. For instance, it might be helpful to map one or both of these commands to normal mode mappings to avoid having to call them from the vim command line each time.
