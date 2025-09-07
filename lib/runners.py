@@ -55,6 +55,11 @@ def _script(cmd_def):
 
 def debug_runner(cmd_def):
     """debug_runner: run a command using nvim-dap"""
+
+    # # Serialize cmd_def to JSON file in /tmp
+    # with open('/tmp/cmd_def', 'w') as f:
+    #     json.dump(cmd_def, f, indent=2)
+
     cmd = f'lua require("config.dap.functions").flow_debug({repr(cmd_def["cmd"])})'
     vim.command(cmd)
 
