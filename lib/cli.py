@@ -1,4 +1,5 @@
 import os
+import threading
 
 import vim
 
@@ -7,22 +8,18 @@ import runners
 
 lock_cache = {}
 
+_running_lock = threading.Lock()
+_running = False
 
-def run_flow(cache=lock_cache):
-    """flow: run a flow for the current filepath
 
-    * find and load flow defs
-    * build cmd_def
-    * run cmd_def
-    """
-    if 'filepath' in lock_cache:
-        filepath = lock_cache['filepath']
-
+def _run_flow_sync(filepath, locked=False):
+    # NOTE: this function may run on a background thread.
+    # Do not call any Neovim APIs (vim.*) here.
+    if locked:
         dirpath = os.path.dirname(filepath)
         dirpath = os.path.expanduser(dirpath)
         os.chdir(dirpath)
-    else:
-        filepath = _get_filepath()
+
     flow_defs = flow.get_defs(filepath)
     if flow_defs is None:
         return
@@ -39,18 +36,51 @@ def run_flow(cache=lock_cache):
         'async-remote': runners.async_remote_runner,
     }[cmd_def['runner']]
 
-    runner(cmd_def)
+    # Anything that touches Neovim (vim.command, etc) must run on the main thread.
+    vim.async_call(runner, cmd_def)
 
 
-def debug_flow(lock_cache):
+def run_flow(_=None):
+    """flow: run a flow for the current filepath (async)
+
+    This avoids freezing Neovim when flow resolution (git/yaml/fs/subprocess) blocks.
+    """
+    global _running
+
+    # Capture Neovim state on the main thread (worker thread must not call vim.*)
     if 'filepath' in lock_cache:
         filepath = lock_cache['filepath']
+        locked = True
+    else:
+        filepath = vim.current.buffer.name
+        locked = False
+
+    with _running_lock:
+        if _running:
+            vim.command('echom "vim-flow: already running"')
+            return
+        _running = True
+
+    def worker():
+        global _running
+        try:
+            _run_flow_sync(filepath, locked=locked)
+        finally:
+            with _running_lock:
+                _running = False
+
+    threading.Thread(target=worker, daemon=True).start()
+
+
+def debug_flow(_=None, cache=lock_cache):
+    if 'filepath' in cache:
+        filepath = cache['filepath']
 
         dirpath = os.path.dirname(filepath)
         dirpath = os.path.expanduser(dirpath)
         os.chdir(dirpath)
     else:
-        filepath = _get_filepath()
+        filepath = vim.current.buffer.name
     flow_defs = flow.get_defs(filepath)
     if flow_defs is None:
         return

@@ -70,7 +70,10 @@ def vim_runner(cmd_def):
     with _script(cmd_def) as script_path:
         term_close = vim.eval('g:term_close')
         if 'nvim' in vim.eval('$VIMRUNTIME'):
+            prev_win = vim.eval('win_getid()')
             vim.command(f'15split term://{script_path}')
+            vim.command('normal! G')
+            vim.command(f'call win_gotoid({prev_win})')
         else:
             vim.command(f'terminal {term_close} ++rows=15 {script_path}')
 

@@ -88,10 +88,18 @@ def get_cmd_def(filepath, flow_defs):
     cmd_def = flow_defs.get('default')
 
     # Check for git projects
-    cmd = f'cd {filedir}; git rev-parse --show-toplevel'
-    out = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
-    repo_full = out.stdout.decode('utf-8')
-    repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
+    repo_name = ''
+    try:
+        out = subprocess.run(
+            ['git', '-C', str(filedir), 'rev-parse', '--show-toplevel'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            timeout=1.0,
+        )
+        repo_full = out.stdout.decode('utf-8') if out.stdout else ''
+        repo_name = repo_full.strip().split('/')[-1] if repo_full else ''
+    except Exception:
+        repo_name = ''
 
     if basename in flow_defs:
         cmd_def = flow_defs[basename]
