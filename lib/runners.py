@@ -1,6 +1,5 @@
 import contextlib
 import glob
-import json
 import os
 import stat
 import subprocess
@@ -17,15 +16,36 @@ def _build_script(cmd_def):
     written to a tempfile and executed
     """
     filepath = '/tmp/flow--{}'.format(int(time.time()))
-    # print(filepath)
 
-    # if the script doesn't start with a hashbang, then we default to the local $SHELL var
+    cmd = cmd_def['cmd']
+    lines = cmd.splitlines()
+
+    # Identify hashbang
+    if lines and lines[0].startswith('#!'):
+        hashbang = lines[0]
+        start_idx = 1
+    else:
+        hashbang = '#!{}'.format(os.environ.get('SHELL', '/usr/bin/env bash'))
+        start_idx = 0
+
+    # Strip 'clear' from the execution part to avoid wiping the 'cat' output
+    cleaned_lines = []
+    for i in range(start_idx, len(lines)):
+        line = lines[i]
+        if line.strip() == 'clear':
+            continue
+        cleaned_lines.append(line)
+
     with open(filepath, 'w') as fh:
-        if not cmd_def['cmd'].startswith('#!'):
-            hashbang = '#!{}\n'.format(os.environ.get('SHELL', '/usr/bin/env bash'))
-            fh.write(hashbang)
+        fh.write(hashbang + '\n')
+        # Display the original command content
+        fh.write("cat << 'VIMFLOW_CONTENT_EOF'\n")
+        fh.write(cmd + '\n')
+        fh.write('VIMFLOW_CONTENT_EOF\n')
+        fh.write('echo "--------------------------------------------------------------------------------"\n')
 
-        fh.write(cmd_def['cmd'])
+        # Execute the cleaned command
+        fh.write('\n'.join(cleaned_lines))
         fh.write('\n')
 
     st = os.stat(filepath)
