@@ -12,28 +12,35 @@ if !has("python3")
   finish
 endif
 
+let s:plugin_path = expand('<sfile>:p:h')
+
 python3 <<EOF
-from os import path as p
 import sys
+from os import path as p
 import vim
 
-lib_path = p.abspath(p.join(vim.eval("expand('<sfile>:p:h')"), "../lib"))
-sys.path.insert(0, lib_path)
-
-import cli
+def _init_vim_flow():
+    global cli
+    if "cli" in globals():
+        return
+    plugin_path = vim.eval("s:plugin_path")
+    lib_path = p.abspath(p.join(plugin_path, "../lib"))
+    if lib_path not in sys.path:
+        sys.path.insert(0, lib_path)
+    import cli
 EOF
 
 " run flow for the current window
-command! FlowRun :python3 cli.run_flow("")
+command! FlowRun :python3 _init_vim_flow(); cli.run_flow("")
 
 " run flow for the current window
-command! FlowDebug :python3 cli.debug_flow("")
+command! FlowDebug :python3 _init_vim_flow(); cli.debug_flow("")
 
 " toggle lock on / off for current file
-command! FlowToggleLock :python3 cli.toggle_lock("")
+command! FlowToggleLock :python3 _init_vim_flow(); cli.toggle_lock("")
 
-command! -nargs=1 FlowSet :python3 cli.toggle_lock(<f-args>)
+command! -nargs=1 FlowSet :python3 _init_vim_flow(); cli.toggle_lock(<f-args>)
 
 function! FlowSetFile(filename)
-  :python3 cli.toggle_lock(vim.eval("a:filename"))
+  :python3 _init_vim_flow(); cli.toggle_lock(vim.eval("a:filename"))
 endfunction

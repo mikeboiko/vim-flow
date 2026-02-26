@@ -5,8 +5,8 @@ import stat
 import subprocess
 import time
 import urllib.parse
+import warnings
 
-import requests
 import vim
 
 
@@ -118,6 +118,14 @@ def tmux_runner(cmd_def):
 
 def async_remote_runner(cmd_def):
     """async_remote_runner: run the command against a vim-flow remote"""
+    try:
+        from requests.exceptions import RequestsDependencyWarning
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
+            import requests
+    except ImportError:
+        import requests
+
     base_url = vim.eval('g:vim_flow_remote_address')
     if not base_url.startswith('http'):
         base_url = 'http://' + 'url'
